@@ -370,11 +370,11 @@
                     </div>
                     <div class="legend-item">
                         <div class="legend-line" style="border-color: #ea4335; border-style: dashed;"></div>
-                        <span>首位基准</span>
+                        <span>首位基准: <strong id="legendFirstBaseline">-</strong></span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-line" style="border-color: #fbbc04; border-style: dashed;"></div>
-                        <span>中正基准</span>
+                        <span>中正基准: <strong id="legendPositiveBaseline">-</strong></span>
                     </div>
                 </div>
             </div>
@@ -642,6 +642,9 @@
             document.getElementById('baselinePositive').textContent = baseline[1];
             document.getElementById('firstBaseline').textContent = `基准: ${baseline[0]}次`;
             document.getElementById('positiveBaseline').textContent = `基准: ${baseline[1]}次`;
+            // Update legend baseline values
+            document.getElementById('legendFirstBaseline').textContent = baseline[0] + '次';
+            document.getElementById('legendPositiveBaseline').textContent = baseline[1] + '次';
 
             // Get dates and data
             const dates = Object.keys(dailyData).sort();
@@ -849,9 +852,7 @@
                         ctx.moveTo(xAxis.left, yBaselineFirst);
                         ctx.lineTo(xAxis.right, yBaselineFirst);
                         ctx.stroke();
-                        ctx.fillStyle = '#ea4335';
-                        ctx.font = '11px sans-serif';
-                        ctx.fillText('首位基准: ' + baseline[0], xAxis.left + 4, yBaselineFirst - 6);
+                        // 首位基准文字由HTML元素显示，不在画布上绘制
                         ctx.restore();
 
                         // 中正 baseline - solid yellow line (full width)
@@ -863,9 +864,7 @@
                         ctx.moveTo(xAxis.left, yBaselinePositive);
                         ctx.lineTo(xAxis.right, yBaselinePositive);
                         ctx.stroke();
-                        ctx.fillStyle = '#fbbc04';
-                        ctx.font = '11px sans-serif';
-                        ctx.fillText('中正基准: ' + baseline[1], xAxis.left + 4, yBaselinePositive - 6);
+                        // 中正基准文字由HTML元素显示，不在画布上绘制
                         ctx.restore();
                     }
                 }]
