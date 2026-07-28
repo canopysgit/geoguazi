@@ -764,11 +764,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            top: 20
-                        }
-                    },
+
                     plugins: {
                         legend: {
                             display: false
@@ -794,7 +790,7 @@
                         },
                         y: {
                             beginAtZero: true,
-                            max: 10,
+                            max: 11,
                             grid: {
                                 color: 'rgba(0,0,0,0.06)'
                             },
@@ -802,7 +798,7 @@
                                 stepSize: 1,
                                 font: { size: 12 },
                                 callback: function(value) {
-                                    return value + '次';
+                                    return value === 11 ? '' : value + '次';
                                 }
                             }
                         }
