@@ -435,42 +435,25 @@
                 <canvas id="trendChart"></canvas>
             </div>
             
-            <!-- Summary Cards -->
-            <div class="summary-grid">
-                <div class="summary-card first">
-                    <div class="label">今日首位得分</div>
-                    <div class="value" id="firstToday">-</div>
-                    <div class="target">目标: ≥8次</div>
-                    <div class="baseline" id="firstBaseline">基准: -次</div>
-                </div>
-                <div class="summary-card positive">
-                    <div class="label">今日中正得分</div>
-                    <div class="value" id="positiveToday">-</div>
-                    <div class="target">目标: ≥7次</div>
-                    <div class="baseline" id="positiveBaseline">基准: -次</div>
-                </div>
-                <div class="summary-card" id="firstStatus">
-                    <div class="label">首位达标状态</div>
-                    <div class="value" id="firstStatusText">-</div>
-                </div>
-                <div class="summary-card" id="positiveStatus">
-                    <div class="label">中正达标状态</div>
-                    <div class="value" id="positiveStatusText">-</div>
-                </div>
-            </div>
-            
-            <!-- Baseline Info -->
-            <div class="baseline-info">
-                <div class="title">7/11-7/15 基准线（5天平均）</div>
-                <div class="values">
-                    <div class="baseline-item">
-                        <div class="baseline-color" style="background: #9aa0a6;"></div>
-                        <span>首位基准: <strong id="baselineFirst">-</strong>次</span>
-                    </div>
-                    <div class="baseline-item">
-                        <div class="baseline-color" style="background: #9aa0a6;"></div>
-                        <span>中正基准: <strong id="baselinePositive">-</strong>次</span>
-                    </div>
+
+            <!-- Monthly Achievement Stats -->
+            <div class="stats-section">
+                <div class="stats-title">达标天数统计（月度）</div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>问题</th>
+                            <th>7月达标</th>
+                            <th>8月达标</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                    </tbody>
+                </table>
+                <div class="stats-threshold">
+                    达标条件：同一天首位≥8 且 中正≥7 同时达标 · 品牌词仅计中正 ·
+                    7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
                 </div>
             </div>
         </div>
@@ -493,26 +476,6 @@
             </table>
         </div>
 
-        <!-- Monthly Achievement Stats -->
-        <div class="stats-section">
-            <div class="stats-title">达标天数统计（月度）</div>
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>编号</th>
-                        <th>问题</th>
-                        <th>7月达标</th>
-                        <th>8月达标</th>
-                    </tr>
-                </thead>
-                <tbody id="statsTableBody">
-                </tbody>
-            </table>
-            <div class="stats-threshold">
-                达标条件：同一天首位≥8 且 中正≥7 同时达标 · 品牌词仅计中正 ·
-                7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
-            </div>
-        </div>
     </div>
     
     <div class="footer">
@@ -576,7 +539,7 @@
                     "08/01": [[5, 10], [5, 10], [6, 10], [7, 10], [1, 10],
                               [5, 10], [8, 10], [0, 10], [7, 10], [0, 2]],
                     "08/02": [[5, 10], [6, 10], [9, 10], [5, 10], [0, 10],
-                              [5, 9], [7, 9], [0, 10], [7, 10], [0, 6]]
+                              [5, 9], [7, 9], [0, 10], [7, 10], [0, 6]],
                     "08/03": [[6, 9], [5, 10], [7, 10], [5, 10], [0, 10],
                               [5, 10], [7, 10], [0, 10], [6, 10], [10, 6]],
                     "08/04": [[6, 10], [5, 10], [6, 10], [5, 10], [0, 10],
@@ -636,7 +599,7 @@
                     "08/01": [[5, 7], [6, 10], [6, 7], [3, 10], [2, 10],
                               [1, 6], [6, 6], [4, 10], [8, 6], [0, 1]],
                     "08/02": [[7, 4], [9, 8], [4, 7], [5, 8], [1, 10],
-                              [2, 6], [9, 5], [6, 10], [7, 5], [0, 2]]
+                              [2, 6], [9, 5], [6, 10], [7, 5], [0, 2]],
                     "08/03": [[7, 7], [7, 10], [7, 8], [6, 8], [3, 10],
                               [2, 8], [10, 4], [7, 10], [8, 5], [10, 0]],
                     "08/04": [[8, 7], [9, 10], [7, 10], [4, 8], [3, 10],
@@ -696,7 +659,7 @@
                     "08/01": [[9, 9], [8, 10], [7, 10], [10, 10], [2, 10],
                               [9, 10], [10, 10], [1, 10], [10, 8], [0, 6]],
                     "08/02": [[9, 10], [9, 10], [8, 10], [9, 9], [2, 10],
-                              [10, 9], [9, 9], [1, 10], [9, 9], [0, 8]]
+                              [10, 9], [9, 9], [1, 10], [9, 9], [0, 8]],
                     "08/03": [[9, 8], [7, 10], [8, 10], [10, 10], [4, 10],
                               [9, 9], [10, 10], [4, 10], [9, 8], [10, 6]],
                     "08/04": [[8, 10], [7, 10], [8, 10], [9, 10], [1, 10],
@@ -759,11 +722,7 @@
             document.getElementById('prevBtn').disabled = currentKwIndex === 0;
             document.getElementById('nextBtn').disabled = currentKwIndex === 9;
 
-            // Update baseline info
-            document.getElementById('baselineFirst').textContent = baseline[0];
-            document.getElementById('baselinePositive').textContent = baseline[1];
-            document.getElementById('firstBaseline').textContent = `基准: ${baseline[0]}次`;
-            document.getElementById('positiveBaseline').textContent = `基准: ${baseline[1]}次`;
+
             // Update legend baseline values
             document.getElementById('legendFirstBaseline').textContent = baseline[0] + '次';
             document.getElementById('legendPositiveBaseline').textContent = baseline[1] + '次';
@@ -791,33 +750,6 @@
                 });
             });
 
-            // Update summary cards (show latest day)
-            if (dates.length > 0) {
-                const lastDate = dates[dates.length - 1];
-                const [lastFirst, lastPositive] = dailyData[lastDate][currentKwIndex];
-                
-                document.getElementById('firstToday').textContent = lastFirst;
-                document.getElementById('positiveToday').textContent = lastPositive;
-                
-                const firstStatusEl = document.getElementById('firstStatus');
-                const positiveStatusEl = document.getElementById('positiveStatus');
-                
-                if (lastFirst >= 8) {
-                    firstStatusEl.className = 'summary-card achieved';
-                    document.getElementById('firstStatusText').textContent = '✓ 达标';
-                } else {
-                    firstStatusEl.className = 'summary-card not-achieved';
-                    document.getElementById('firstStatusText').textContent = '✗ 未达标';
-                }
-                
-                if (lastPositive >= 7) {
-                    positiveStatusEl.className = 'summary-card achieved';
-                    document.getElementById('positiveStatusText').textContent = '✓ 达标';
-                } else {
-                    positiveStatusEl.className = 'summary-card not-achieved';
-                    document.getElementById('positiveStatusText').textContent = '✗ 未达标';
-                }
-            }
 
             // Update table
             const tbody = document.getElementById('dailyTableBody');
