@@ -413,6 +413,27 @@
             <div class="kw-counter"><span id="kwIndex">1</span> / 10</div>
             <button class="nav-btn" id="nextBtn">›</button>
         </div>
+
+        <!-- Monthly Achievement Stats -->
+        <div class="stats-section">
+            <div class="stats-title">达标天数统计（月度）</div>
+            <div class="stats-kw-name" id="statsKwName">-</div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>首位达标</th>
+                        <th>中正达标</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                </tbody>
+            </table>
+            <div class="stats-threshold">
+                达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
+                7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
+            </div>
+        </div>
         
         <!-- Chart Section -->
         <div class="chart-section">
@@ -439,29 +460,6 @@
             </div>
             <div class="chart-container">
                 <canvas id="trendChart"></canvas>
-            </div>
-            
-
-
-            <!-- Monthly Achievement Stats -->
-            <div class="stats-section">
-                <div class="stats-title">达标天数统计（月度）</div>
-                <div class="stats-kw-name" id="statsKwName">-</div>
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>指标</th>
-                            <th>7月达标</th>
-                            <th>8月达标</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statsTableBody">
-                    </tbody>
-                </table>
-                <div class="stats-threshold">
-                    达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
-                    7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
-                </div>
             </div>
         </div>
         
@@ -960,22 +958,25 @@
             document.getElementById('statsKwName').textContent =
                 'B' + String(currentKwIndex + 1).padStart(3, '0') + ' ' + kw.name;
 
+
             const rows = [];
-            if (!isBrand) {
-                const j = stats['7月'], a = stats['8月'];
-                const jc = j.total > 0 && j.firstOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
-                const ac = a.total > 0 && a.firstOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
-                rows.push(`<tr><td>首位达标</td>` +
-                    `<td class="${jc}">${j.total > 0 ? j.firstOk + '/' + j.total : '—'}</td>` +
-                    `<td class="${ac}">${a.total > 0 ? a.firstOk + '/' + a.total : '—'}</td></tr>`);
-            }
+            // 8月 row first
             {
-                const j = stats['7月'], a = stats['8月'];
-                const jc = j.total > 0 && j.positiveOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
-                const ac = a.total > 0 && a.positiveOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
-                rows.push(`<tr><td>中正达标</td>` +
-                    `<td class="${jc}">${j.total > 0 ? j.positiveOk + '/' + j.total : '—'}</td>` +
-                    `<td class="${ac}">${a.total > 0 ? a.positiveOk + '/' + a.total : '—'}</td></tr>`);
+                const a = stats['8月'];
+                const fc = !isBrand && a.total > 0 && a.firstOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                const pc = a.total > 0 && a.positiveOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                const fCell = isBrand ? '<td class="na-cell">—</td>' :
+                    `<td class="${fc}">${a.total > 0 ? a.firstOk + '/' + a.total : '—'}</td>`;
+                rows.push(`<tr><td>8月</td>${fCell}<td class="${pc}">${a.total > 0 ? a.positiveOk + '/' + a.total : '—'}</td></tr>`);
+            }
+            // 7月 row
+            {
+                const j = stats['7月'];
+                const fc = !isBrand && j.total > 0 && j.firstOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const pc = j.total > 0 && j.positiveOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const fCell = isBrand ? '<td class="na-cell">—</td>' :
+                    `<td class="${fc}">${j.total > 0 ? j.firstOk + '/' + j.total : '—'}</td>`;
+                rows.push(`<tr><td>7月</td>${fCell}<td class="${pc}">${j.total > 0 ? j.positiveOk + '/' + j.total : '—'}</td></tr>`);
             }
             document.getElementById('statsTableBody').innerHTML = rows.join('');
         }
