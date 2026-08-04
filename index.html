@@ -150,15 +150,15 @@
         .chart-section {
             background: var(--card);
             border-radius: 12px;
-            padding: 24px;
+            padding: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
             gap: 12px;
         }
@@ -190,7 +190,7 @@
         }
         .chart-container {
             position: relative;
-            height: 350px;
+            height: 220px;
         }
         
         /* Summary Cards */
@@ -328,27 +328,27 @@
         .stats-section {
             background: var(--card);
             border-radius: 12px;
-            padding: 24px;
+            padding: 14px 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            margin-top: 24px;
+            margin-top: 10px;
         }
         .stats-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
         .stats-kw-name {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
         .stats-table {
             width: 100%;
             border-collapse: collapse;
         }
         .stats-table th, .stats-table td {
-            padding: 10px 14px;
+            padding: 8px 12px;
             text-align: left;
             border-bottom: 1px solid var(--border);
             font-size: 13px;
@@ -377,9 +377,9 @@
             font-style: italic;
         }
         .stats-threshold {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
-            margin-top: 12px;
+            margin-top: 8px;
             line-height: 1.6;
         }
     </style>
@@ -414,27 +414,6 @@
             <button class="nav-btn" id="nextBtn">›</button>
         </div>
 
-        <!-- Monthly Achievement Stats -->
-        <div class="stats-section">
-            <div class="stats-title">达标天数统计（月度）</div>
-            <div class="stats-kw-name" id="statsKwName">-</div>
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>首位达标</th>
-                        <th>中正达标</th>
-                    </tr>
-                </thead>
-                <tbody id="statsTableBody">
-                </tbody>
-            </table>
-            <div class="stats-threshold">
-                达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
-                7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
-            </div>
-        </div>
-        
         <!-- Chart Section -->
         <div class="chart-section">
             <div class="chart-header">
@@ -460,6 +439,27 @@
             </div>
             <div class="chart-container">
                 <canvas id="trendChart"></canvas>
+            </div>
+
+            <!-- Monthly Achievement Stats -->
+            <div class="stats-section">
+                <div class="stats-title">达标天数统计（月度）</div>
+                <div class="stats-kw-name" id="statsKwName">-</div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>首位达标</th>
+                            <th>中正达标</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                    </tbody>
+                </table>
+                <div class="stats-threshold">
+                    达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
+                    7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
+                </div>
             </div>
         </div>
         
