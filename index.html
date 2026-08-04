@@ -323,6 +323,59 @@
             .kw-nav .kw-name { font-size: 16px; }
             .chart-legend { gap: 12px; }
         }
+
+        /* Monthly Achievement Stats */
+        .stats-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-top: 24px;
+        }
+        .stats-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .stats-table th, .stats-table td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .stats-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .stats-table .kw-name-cell {
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .stats-table .achieved-green {
+            background: #e6f4ea;
+            color: #1e7e34;
+            font-weight: 600;
+        }
+        .stats-table .not-achieved {
+            color: var(--text-secondary);
+        }
+        .stats-table .na-cell {
+            color: #9aa0a6;
+            font-style: italic;
+        }
+        .stats-threshold {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -330,7 +383,7 @@
         <h1>瓜子二手车 GEO 达标趋势看板</h1>
         <div class="subtitle">10个监测问题 · 3个AI平台 · 每日达标次数追踪</div>
         <div class="meta">
-            <span><div class="dot"></div>数据周期: 2026.7.16 – 8.2</span>
+            <span><div class="dot"></div>数据周期: 2026.7.16 – 8.4</span>
             <span><div class="dot"></div>考核标准: 首位≥8次 · 中正≥7次</span>
             <span><div class="dot"></div>基准线: 7/11-7/15 平均值</span>
         </div>
@@ -438,6 +491,27 @@
                 <tbody id="dailyTableBody">
                 </tbody>
             </table>
+        </div>
+
+        <!-- Monthly Achievement Stats -->
+        <div class="stats-section">
+            <div class="stats-title">达标天数统计（月度）</div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>问题</th>
+                        <th>7月达标</th>
+                        <th>8月达标</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                </tbody>
+            </table>
+            <div class="stats-threshold">
+                达标条件：同一天首位≥8 且 中正≥7 同时达标 · 品牌词仅计中正 ·
+                7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
+            </div>
         </div>
     </div>
     
@@ -759,6 +833,7 @@
 
             // Update chart
             updateChart(dates, firstData, positiveData, baseline);
+            renderStatsTable();
         }
 
         function updateChart(dates, firstData, positiveData, baseline) {
@@ -918,6 +993,59 @@
                     }
                 }]
             });
+        }
+
+
+        function renderStatsTable() {
+            const data = DATA[currentPlatform];
+            const keywords = data.keywords;
+            const dailyData = data.daily;
+
+            // Monthly achievement thresholds
+            const thresholds = { '7月': 13, '8月': 26 };
+
+            // Initialize counters
+            const stats = {};
+            Object.keys(thresholds).forEach(m => {
+                stats[m] = { total: 0, achieved: new Array(keywords.length).fill(0) };
+            });
+
+            // Iterate daily data
+            Object.entries(dailyData).forEach(([date, dayData]) => {
+                const monthKey = date.startsWith('07/') ? '7月' : date.startsWith('08/') ? '8月' : null;
+                if (!monthKey || !stats[monthKey]) return;
+                stats[monthKey].total++;
+
+                dayData.forEach((scores, qIndex) => {
+                    const [first, positive] = scores;
+                    const isBrand = keywords[qIndex].type === '品牌词';
+                    // 达标: 首位≥8 AND 中正≥7 (品牌词仅看中正)
+                    const firstOk = isBrand ? true : first >= 8;
+                    const positiveOk = positive >= 7;
+                    if (firstOk && positiveOk) {
+                        stats[monthKey].achieved[qIndex]++;
+                    }
+                });
+            });
+
+            // Render table
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = keywords.map((kw, i) => {
+                const julyA = stats['7月'].achieved[i];
+                const julyT = stats['7月'].total;
+                const augA = stats['8月'].achieved[i];
+                const augT = stats['8月'].total;
+
+                const julyClass = julyT > 0 && julyA >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const augClass = augT > 0 && augA >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+
+                return `<tr>
+                    <td>B${String(i + 1).padStart(3, '0')}</td>
+                    <td class="kw-name-cell">${kw.name}</td>
+                    <td class="${julyClass}">${julyT > 0 ? julyA + '/' + julyT : '—'}</td>
+                    <td class="${augClass}">${augT > 0 ? augA + '/' + augT : '—'}</td>
+                </tr>`;
+            }).join('');
         }
 
         // Start
