@@ -337,6 +337,12 @@
             font-weight: 600;
             margin-bottom: 16px;
         }
+        .stats-kw-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 14px;
+        }
         .stats-table {
             width: 100%;
             border-collapse: collapse;
@@ -436,14 +442,15 @@
             </div>
             
 
+
             <!-- Monthly Achievement Stats -->
             <div class="stats-section">
                 <div class="stats-title">达标天数统计（月度）</div>
+                <div class="stats-kw-name" id="statsKwName">-</div>
                 <table class="stats-table">
                     <thead>
                         <tr>
-                            <th>编号</th>
-                            <th>问题</th>
+                            <th>指标</th>
                             <th>7月达标</th>
                             <th>8月达标</th>
                         </tr>
@@ -452,7 +459,7 @@
                     </tbody>
                 </table>
                 <div class="stats-threshold">
-                    达标条件：同一天首位≥8 且 中正≥7 同时达标 · 品牌词仅计中正 ·
+                    达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
                     7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
                 </div>
             </div>
@@ -928,56 +935,49 @@
         }
 
 
+
         function renderStatsTable() {
             const data = DATA[currentPlatform];
-            const keywords = data.keywords;
+            const kw = data.keywords[currentKwIndex];
             const dailyData = data.daily;
+            const isBrand = kw.type === '品牌词';
 
-            // Monthly achievement thresholds
             const thresholds = { '7月': 13, '8月': 26 };
-
-            // Initialize counters
             const stats = {};
             Object.keys(thresholds).forEach(m => {
-                stats[m] = { total: 0, achieved: new Array(keywords.length).fill(0) };
+                stats[m] = { total: 0, firstOk: 0, positiveOk: 0 };
             });
 
-            // Iterate daily data
             Object.entries(dailyData).forEach(([date, dayData]) => {
                 const monthKey = date.startsWith('07/') ? '7月' : date.startsWith('08/') ? '8月' : null;
                 if (!monthKey || !stats[monthKey]) return;
                 stats[monthKey].total++;
-
-                dayData.forEach((scores, qIndex) => {
-                    const [first, positive] = scores;
-                    const isBrand = keywords[qIndex].type === '品牌词';
-                    // 达标: 首位≥8 AND 中正≥7 (品牌词仅看中正)
-                    const firstOk = isBrand ? true : first >= 8;
-                    const positiveOk = positive >= 7;
-                    if (firstOk && positiveOk) {
-                        stats[monthKey].achieved[qIndex]++;
-                    }
-                });
+                const [first, positive] = dayData[currentKwIndex];
+                if (!isBrand && first >= 8) stats[monthKey].firstOk++;
+                if (positive >= 7) stats[monthKey].positiveOk++;
             });
 
-            // Render table
-            const tbody = document.getElementById('statsTableBody');
-            tbody.innerHTML = keywords.map((kw, i) => {
-                const julyA = stats['7月'].achieved[i];
-                const julyT = stats['7月'].total;
-                const augA = stats['8月'].achieved[i];
-                const augT = stats['8月'].total;
+            document.getElementById('statsKwName').textContent =
+                'B' + String(currentKwIndex + 1).padStart(3, '0') + ' ' + kw.name;
 
-                const julyClass = julyT > 0 && julyA >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
-                const augClass = augT > 0 && augA >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
-
-                return `<tr>
-                    <td>B${String(i + 1).padStart(3, '0')}</td>
-                    <td class="kw-name-cell">${kw.name}</td>
-                    <td class="${julyClass}">${julyT > 0 ? julyA + '/' + julyT : '—'}</td>
-                    <td class="${augClass}">${augT > 0 ? augA + '/' + augT : '—'}</td>
-                </tr>`;
-            }).join('');
+            const rows = [];
+            if (!isBrand) {
+                const j = stats['7月'], a = stats['8月'];
+                const jc = j.total > 0 && j.firstOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const ac = a.total > 0 && a.firstOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                rows.push(`<tr><td>首位达标</td>` +
+                    `<td class="${jc}">${j.total > 0 ? j.firstOk + '/' + j.total : '—'}</td>` +
+                    `<td class="${ac}">${a.total > 0 ? a.firstOk + '/' + a.total : '—'}</td></tr>`);
+            }
+            {
+                const j = stats['7月'], a = stats['8月'];
+                const jc = j.total > 0 && j.positiveOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const ac = a.total > 0 && a.positiveOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                rows.push(`<tr><td>中正达标</td>` +
+                    `<td class="${jc}">${j.total > 0 ? j.positiveOk + '/' + j.total : '—'}</td>` +
+                    `<td class="${ac}">${a.total > 0 ? a.positiveOk + '/' + a.total : '—'}</td></tr>`);
+            }
+            document.getElementById('statsTableBody').innerHTML = rows.join('');
         }
 
         // Start
