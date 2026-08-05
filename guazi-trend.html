@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瓜子二手车 GEO 达标趋势看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --success: #34a853;
+            --warning: #fbbc04;
+            --danger: #ea4335;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #202124;
+            --text-secondary: #5f6368;
+            --border: #e8eaed;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: white;
+            padding: 24px 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+        .header .meta {
+            margin-top: 12px;
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .header .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header .meta .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            background: var(--bg);
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(26,115,232,0.3);
+        }
+        
+        /* Keyword Navigation */
+        .kw-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .kw-nav .nav-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .kw-nav .nav-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .kw-nav .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .kw-nav .kw-info {
+            flex: 1;
+            text-align: center;
+        }
+        .kw-nav .kw-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .kw-nav .kw-type {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .kw-nav .kw-counter {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* Chart Container */
+        .chart-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 12px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+        .chart-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chart-legend .legend-dot {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        .chart-legend .legend-line {
+            width: 20px;
+            height: 0;
+            border-top: 2px dashed;
+        }
+        .chart-container {
+            position: relative;
+            height: 220px;
+        }
+        
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .summary-card .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .summary-card .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .summary-card .target {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .summary-card .baseline {
+            font-size: 12px;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+        .summary-card.first .value { color: var(--primary); }
+        .summary-card.positive .value { color: var(--success); }
+        .summary-card.achieved .value { color: var(--success); }
+        .summary-card.not-achieved .value { color: var(--danger); }
+        
+        /* Baseline Info */
+        .baseline-info {
+            background: #e8f0fe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .baseline-info .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .baseline-info .values {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+        }
+        .baseline-info .baseline-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .baseline-info .baseline-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        /* Table */
+        .table-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        td {
+            font-size: 14px;
+        }
+        tr:hover td {
+            background: rgba(26,115,232,0.04);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-badge.achieved {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+        .status-badge.not-achieved {
+            background: #fce8e6;
+            color: #c5221f;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .kw-nav .kw-name { font-size: 16px; }
+            .chart-legend { gap: 12px; }
+        }
+
+        /* Monthly Achievement Stats */
+        .stats-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-top: 10px;
+        }
+        .stats-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .stats-kw-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .stats-table th, .stats-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .stats-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .stats-table .kw-name-cell {
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .stats-table .achieved-green {
+            background: #e6f4ea;
+            color: #1e7e34;
+            font-weight: 600;
+        }
+        .stats-table .not-achieved {
+            color: var(--text-secondary);
+        }
+        .stats-table .na-cell {
+            color: #9aa0a6;
+            font-style: italic;
+        }
+        .stats-threshold {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>瓜子二手车 GEO 达标趋势看板</h1>
+        <div class="subtitle">10个监测问题 · 3个AI平台 · 每日达标次数追踪</div>
+        <div class="meta">
+            <span><div class="dot"></div>数据周期: 2026.7.16 – 8.4</span>
+            <span><div class="dot"></div>考核标准: 首位≥8次 · 中正≥7次</span>
+            <span><div class="dot"></div>基准线: 7/11-7/15 平均值</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Platform Tabs -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-platform="豆包">豆包</button>
+            <button class="tab-btn" data-platform="DeepSeek">DeepSeek</button>
+            <button class="tab-btn" data-platform="千问">千问</button>
+        </div>
+        
+        <!-- Keyword Navigation -->
+        <div class="kw-nav">
+            <button class="nav-btn" id="prevBtn">‹</button>
+            <div class="kw-info">
+                <div class="kw-name" id="kwName">二手车平台哪个更靠谱</div>
+                <div class="kw-type" id="kwType">行业词</div>
+            </div>
+            <div class="kw-counter"><span id="kwIndex">1</span> / 10</div>
+            <button class="nav-btn" id="nextBtn">›</button>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <div class="chart-title">每日达标次数趋势</div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-line" style="border-color: #ea4335;"></div>
+                        <span>首位目标: 8次</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="border-color: #fbbc04;"></div>
+                        <span>中正目标: 7次</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="border-color: #ea4335; border-style: dashed;"></div>
+                        <span>首位基准: <strong id="legendFirstBaseline">-</strong></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="border-color: #fbbc04; border-style: dashed;"></div>
+                        <span>中正基准: <strong id="legendPositiveBaseline">-</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+
+            <!-- Monthly Achievement Stats -->
+            <div class="stats-section">
+                <div class="stats-title">达标天数统计（月度）</div>
+                <div class="stats-kw-name" id="statsKwName">-</div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>首位达标</th>
+                            <th>中正达标</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                    </tbody>
+                </table>
+                <div class="stats-threshold">
+                    达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
+                    7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
+                </div>
+            </div>
+        </div>
+        
+        <!-- Daily Data Table -->
+        <div class="table-section">
+            <div class="table-title">每日数据明细</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>首位得分</th>
+                        <th>中正得分</th>
+                        <th>首位达标</th>
+                        <th>中正达标</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyTableBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    
+    <div class="footer">
+        Generated by GEO Dashboard · 瓜子二手车项目 · 数据更新时间: 2026-08-04
+    </div>
+    <script>
+        // Data structure
+        const DATA = {
+            "豆包": {
+                keywords: [
+                    { name: "二手车平台哪个更靠谱", type: "行业词" },
+                    { name: "新能源二手车推荐哪个平台", type: "行业词" },
+                    { name: "二手车女生开在哪个平台买好", type: "行业词" },
+                    { name: "5万左右的二手车在哪个平台买好", type: "行业词" },
+                    { name: "买二手车需注意什么", type: "行业词" },
+                    { name: "私人转让二手车在哪个平台卖价格高", type: "行业词" },
+                    { name: "买二手车哪个平台好", type: "行业词" },
+                    { name: "买二手车攻略新手必看", type: "行业词" },
+                    { name: "买二手车哪个平台比较靠谱", type: "行业词" },
+                    { name: "瓜子二手车靠谱吗", type: "品牌词" }
+                ],
+                // 7/11-7/15 baseline [首位avg, 中正avg]
+                baseline: [
+                    [8.2, 8.2], [0.2, 0.4], [8.4, 9.2], [6.8, 8.6], [0.8, 2.2],
+                    [8.0, 9.2], [8.6, 8.8], [0.8, 2.8], [7.2, 7.8], [0, 1.0]
+                ],
+                // Daily data: [首位, 中正]
+                daily: {
+                    "07/16": [[5, 9], [3, 10], [5, 10], [7, 10], [0, 0],
+                              [5, 10], [9, 10], [0, 0], [10, 9], [0, 3]],
+                    "07/17": [[6, 9], [3, 10], [4, 8], [9, 9], [1, 2],
+                              [6, 7], [7, 10], [0, 2], [7, 7], [0, 0]],
+                    "07/18": [[9, 8], [4, 10], [7, 8], [5, 8], [0, 0],
+                              [6, 9], [8, 8], [1, 6], [6, 9], [0, 3]],
+                    "07/19": [[7, 10], [3, 10], [7, 10], [6, 8], [0, 0],
+                              [6, 7], [9, 8], [1, 5], [8, 10], [0, 4]],
+                    "07/20": [[8, 9], [2, 10], [8, 10], [5, 10], [0, 0],
+                              [9, 9], [9, 8], [0, 2], [7, 6], [0, 3]],
+                    "07/21": [[8, 9], [2, 9], [7, 10], [4, 8], [0, 0],
+                              [7, 9], [10, 9], [0, 3], [8, 8], [0, 3]],
+                    "07/22": [[8, 9], [5, 10], [6, 10], [4, 8], [0, 0],
+                              [7, 9], [8, 8], [0, 2], [8, 8], [0, 1]],
+                    "07/23": [[9, 8], [6, 10], [6, 10], [4, 9], [0, 0],
+                              [6, 9], [8, 10], [0, 3], [5, 8], [0, 0]],
+                    "07/24": [[7, 10], [7, 10], [6, 10], [5, 8], [0, 0],
+                              [8, 10], [8, 8], [0, 3], [6, 9], [0, 1]],
+                    "07/25": [[7, 9], [6, 10], [7, 10], [3, 10], [0, 0],
+                              [7, 10], [6, 7], [0, 4], [6, 9], [0, 1]],
+                    "07/26": [[5, 10], [4, 10], [8, 8], [6, 10], [0, 0],
+                              [7, 9], [8, 8], [0, 4], [6, 8], [0, 1]],
+                    "07/27": [[5, 10], [5, 10], [8, 10], [8, 10], [0, 0],
+                              [7, 9], [9, 10], [0, 2], [5, 9], [0, 2]],
+                    "07/28": [[8, 10], [4, 9], [2, 9], [7, 8], [0, 2],
+                              [7, 10], [7, 10], [0, 2], [7, 9], [0, 4]],
+                    "07/29": [[5, 9], [4, 10], [6, 10], [6, 9], [0, 0],
+                              [5, 10], [9, 10], [0, 10], [4, 8], [10, 3]],
+                    "07/30": [[4, 9], [6, 10], [6, 10], [6, 10], [0, 0],
+                              [6, 10], [6, 10], [0, 10], [6, 9], [0, 3]],
+                    "07/31": [[7, 8], [5, 10], [9, 10], [4, 8], [0, 0],
+                              [7, 9], [9, 8], [0, 9], [6, 8], [0, 1]],
+                    "08/01": [[5, 10], [5, 10], [6, 10], [7, 10], [1, 0],
+                              [5, 10], [8, 10], [0, 10], [7, 10], [0, 2]],
+                    "08/02": [[5, 10], [6, 10], [9, 10], [5, 10], [0, 0],
+                              [5, 9], [7, 9], [0, 10], [7, 10], [0, 6]],
+                    "08/03": [[6, 9], [5, 10], [7, 10], [5, 10], [0, 0],
+                              [5, 10], [7, 10], [0, 10], [6, 10], [10, 6]],
+                    "08/04": [[6, 10], [5, 10], [6, 10], [5, 10], [0, 0],
+                              [6, 9], [8, 10], [1, 10], [5, 9], [10, 4]]
+                }
+            },
+            "DeepSeek": {
+                keywords: [
+                    { name: "二手车平台哪个更靠谱", type: "行业词" },
+                    { name: "新能源二手车推荐哪个平台", type: "行业词" },
+                    { name: "二手车女生开在哪个平台买好", type: "行业词" },
+                    { name: "5万左右的二手车在哪个平台买好", type: "行业词" },
+                    { name: "买二手车需注意什么", type: "行业词" },
+                    { name: "私人转让二手车在哪个平台卖价格高", type: "行业词" },
+                    { name: "买二手车哪个平台好", type: "行业词" },
+                    { name: "买二手车攻略新手必看", type: "行业词" },
+                    { name: "买二手车哪个平台比较靠谱", type: "行业词" },
+                    { name: "瓜子二手车靠谱吗", type: "品牌词" }
+                ],
+                baseline: [
+                    [7.6, 6.2], [8.2, 8.4], [9.0, 8.8], [5.8, 8.0], [0, 0],
+                    [7.0, 8.4], [7.8, 7.8], [0.4, 0.4], [8.4, 5.6], [0, 0.4]
+                ],
+                daily: {
+                    "07/16": [[6, 4], [5, 10], [6, 9], [7, 9], [0, 0],
+                              [5, 7], [4, 6], [0, 0], [5, 7], [0, 0]],
+                    "07/17": [[5, 6], [2, 10], [2, 6], [4, 8], [0, 0],
+                              [4, 7], [4, 7], [1, 1], [6, 8], [0, 0]],
+                    "07/18": [[5, 5], [10, 10], [3, 7], [8, 4], [0, 0],
+                              [0, 3], [4, 5], [1, 1], [3, 7], [0, 0]],
+                    "07/19": [[7, 8], [8, 7], [5, 9], [5, 6], [0, 0],
+                              [3, 6], [6, 4], [0, 1], [4, 8], [0, 0]],
+                    "07/20": [[9, 8], [9, 9], [4, 7], [2, 7], [0, 0],
+                              [3, 9], [5, 3], [1, 1], [6, 7], [0, 1]],
+                    "07/21": [[10, 4], [10, 9], [3, 6], [4, 6], [0, 0],
+                              [1, 7], [9, 7], [1, 1], [7, 2], [0, 0]],
+                    "07/22": [[8, 4], [7, 8], [5, 9], [5, 6], [3, 3],
+                              [4, 10], [9, 6], [5, 9], [7, 5], [0, 1]],
+                    "07/23": [[10, 6], [8, 9], [7, 9], [6, 7], [4, 4],
+                              [3, 8], [9, 7], [3, 4], [9, 4], [0, 1]],
+                    "07/24": [[10, 7], [9, 9], [4, 7], [7, 8], [2, 3],
+                              [5, 10], [9, 6], [3, 5], [6, 6], [0, 0]],
+                    "07/25": [[9, 4], [8, 10], [4, 6], [9, 7], [0, 0],
+                              [2, 8], [10, 3], [0, 2], [7, 3], [0, 0]],
+                    "07/26": [[10, 4], [6, 9], [8, 6], [4, 9], [0, 0],
+                              [3, 10], [9, 9], [0, 0], [10, 4], [0, 0]],
+                    "07/27": [[10, 5], [8, 7], [7, 8], [3, 7], [1, 1],
+                              [1, 5], [8, 7], [1, 3], [8, 3], [0, 0]],
+                    "07/28": [[9, 3], [8, 5], [7, 10], [7, 8], [3, 3],
+                              [2, 8], [9, 5], [5, 6], [9, 7], [0, 0]],
+                    "07/29": [[8, 4], [8, 10], [7, 10], [5, 9], [2, 0],
+                              [3, 9], [8, 5], [4, 10], [8, 5], [10, 0]],
+                    "07/30": [[8, 4], [6, 8], [4, 8], [7, 8], [3, 0],
+                              [7, 10], [10, 6], [6, 10], [8, 7], [0, 0]],
+                    "07/31": [[8, 2], [6, 7], [7, 9], [6, 8], [1, 0],
+                              [4, 3], [7, 6], [3, 10], [8, 7], [0, 0]],
+                    "08/01": [[5, 7], [6, 10], [6, 7], [3, 10], [2, 0],
+                              [1, 6], [6, 6], [4, 10], [8, 6], [0, 1]],
+                    "08/02": [[7, 4], [9, 8], [4, 7], [5, 8], [1, 0],
+                              [2, 6], [9, 5], [6, 10], [7, 5], [0, 2]],
+                    "08/03": [[7, 7], [7, 10], [7, 8], [6, 8], [3, 0],
+                              [2, 8], [10, 4], [7, 10], [8, 5], [10, 0]],
+                    "08/04": [[8, 7], [9, 10], [7, 10], [4, 8], [3, 0],
+                              [2, 9], [9, 8], [5, 10], [8, 4], [10, 0]]
+                }
+            },
+            "千问": {
+                keywords: [
+                    { name: "二手车平台哪个更靠谱", type: "行业词" },
+                    { name: "新能源二手车推荐哪个平台", type: "行业词" },
+                    { name: "二手车女生开在哪个平台买好", type: "行业词" },
+                    { name: "5万左右的二手车在哪个平台买好", type: "行业词" },
+                    { name: "买二手车需注意什么", type: "行业词" },
+                    { name: "私人转让二手车在哪个平台卖价格高", type: "行业词" },
+                    { name: "买二手车哪个平台好", type: "行业词" },
+                    { name: "买二手车攻略新手必看", type: "行业词" },
+                    { name: "买二手车哪个平台比较靠谱", type: "行业词" },
+                    { name: "瓜子二手车靠谱吗", type: "品牌词" }
+                ],
+                baseline: [
+                    [7.4, 8.8], [9.2, 10.0], [4.8, 8.4], [6.4, 8.4], [0.6, 0.6],
+                    [5.2, 7.6], [8.4, 10.0], [0.2, 1.0], [8.2, 8.4], [0, 9.0]
+                ],
+                daily: {
+                    "07/16": [[8, 9], [10, 10], [3, 10], [6, 9], [1, 1],
+                              [7, 10], [7, 10], [0, 0], [10, 8], [0, 8]],
+                    "07/17": [[7, 10], [7, 10], [2, 8], [8, 10], [1, 1],
+                              [7, 9], [6, 9], [0, 0], [7, 9], [0, 7]],
+                    "07/18": [[8, 10], [4, 10], [2, 7], [7, 10], [0, 0],
+                              [7, 8], [7, 9], [0, 0], [10, 9], [0, 4]],
+                    "07/19": [[7, 8], [7, 10], [5, 9], [7, 9], [0, 0],
+                              [7, 9], [9, 10], [1, 1], [9, 8], [0, 3]],
+                    "07/20": [[10, 10], [8, 10], [4, 8], [5, 6], [0, 0],
+                              [7, 9], [10, 9], [1, 1], [9, 10], [0, 7]],
+                    "07/21": [[7, 9], [10, 10], [6, 9], [6, 9], [0, 0],
+                              [9, 9], [9, 9], [0, 1], [5, 10], [0, 5]],
+                    "07/22": [[7, 8], [8, 10], [4, 9], [9, 10], [0, 0],
+                              [8, 9], [7, 8], [0, 1], [7, 7], [0, 4]],
+                    "07/23": [[9, 10], [8, 9], [3, 10], [5, 7], [0, 0],
+                              [8, 8], [10, 10], [1, 3], [10, 10], [0, 6]],
+                    "07/24": [[6, 9], [7, 9], [4, 10], [5, 7], [0, 0],
+                              [7, 10], [7, 10], [1, 1], [3, 10], [0, 9]],
+                    "07/25": [[7, 9], [5, 10], [3, 10], [3, 8], [0, 0],
+                              [9, 10], [6, 9], [1, 2], [4, 10], [0, 2]],
+                    "07/26": [[5, 10], [6, 9], [5, 9], [2, 8], [0, 2],
+                              [7, 10], [7, 10], [1, 1], [6, 9], [0, 5]],
+                    "07/27": [[8, 10], [9, 10], [4, 9], [4, 7], [0, 1],
+                              [9, 10], [7, 9], [0, 1], [7, 10], [0, 5]],
+                    "07/28": [[9, 10], [10, 10], [6, 10], [10, 10], [3, 4],
+                              [7, 10], [9, 10], [0, 1], [9, 10], [0, 7]],
+                    "07/29": [[9, 9], [8, 10], [8, 10], [10, 10], [0, 0],
+                              [10, 10], [10, 9], [0, 10], [10, 8], [10, 9]],
+                    "07/30": [[9, 9], [10, 10], [8, 10], [10, 10], [1, 0],
+                              [8, 10], [8, 7], [2, 10], [9, 10], [0, 10]],
+                    "07/31": [[8, 10], [9, 10], [5, 9], [10, 10], [0, 0],
+                              [7, 7], [10, 10], [1, 10], [8, 10], [0, 9]],
+                    "08/01": [[9, 9], [8, 10], [7, 10], [10, 10], [2, 0],
+                              [9, 10], [10, 10], [1, 10], [10, 8], [0, 6]],
+                    "08/02": [[9, 10], [9, 10], [8, 10], [9, 9], [2, 0],
+                              [10, 9], [9, 9], [1, 10], [9, 9], [0, 8]],
+                    "08/03": [[9, 8], [7, 10], [8, 10], [10, 10], [4, 0],
+                              [9, 9], [10, 10], [4, 10], [9, 8], [10, 6]],
+                    "08/04": [[8, 10], [7, 10], [8, 10], [9, 10], [1, 0],
+                              [9, 10], [10, 10], [1, 10], [9, 10], [10, 5]]
+                }
+            }
+        };
+
+        // State
+        let currentPlatform = "豆包";
+        let currentKwIndex = 0;
+        let chart = null;
+
+        // Initialize
+        function init() {
+            setupEventListeners();
+            updateView();
+        }
+
+        function setupEventListeners() {
+            // Platform tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentPlatform = btn.dataset.platform;
+                    currentKwIndex = 0;
+                    updateView();
+                });
+            });
+
+            // Keyword navigation
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentKwIndex > 0) {
+                    currentKwIndex--;
+                    updateView();
+                }
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentKwIndex < 9) {
+                    currentKwIndex++;
+                    updateView();
+                }
+            });
+        }
+
+        function updateView() {
+            const data = DATA[currentPlatform];
+            const kw = data.keywords[currentKwIndex];
+            const baseline = data.baseline[currentKwIndex];
+            const dailyData = data.daily;
+
+            // Update keyword info
+            document.getElementById('kwName').textContent = kw.name;
+            document.getElementById('kwType').textContent = kw.type;
+            document.getElementById('kwIndex').textContent = currentKwIndex + 1;
+
+            // Update nav buttons
+            document.getElementById('prevBtn').disabled = currentKwIndex === 0;
+            document.getElementById('nextBtn').disabled = currentKwIndex === 9;
+
+
+            // Update legend baseline values
+            document.getElementById('legendFirstBaseline').textContent = baseline[0] + '次';
+            document.getElementById('legendPositiveBaseline').textContent = baseline[1] + '次';
+
+            // Get dates and data
+            const dates = Object.keys(dailyData).sort();
+            const firstData = [];
+            const positiveData = [];
+            const tableRows = [];
+
+            dates.forEach(date => {
+                const [first, positive] = dailyData[date][currentKwIndex];
+                const firstTarget = first >= 8;
+                const positiveTarget = positive >= 7;
+                
+                firstData.push(first);
+                positiveData.push(positive);
+                
+                tableRows.push({
+                    date,
+                    first,
+                    positive,
+                    firstTarget,
+                    positiveTarget
+                });
+            });
+
+
+            // Update table
+            const tbody = document.getElementById('dailyTableBody');
+            tbody.innerHTML = tableRows.map(row => `
+                <tr>
+                    <td>${row.date}</td>
+                    <td>${row.first}</td>
+                    <td>${row.positive}</td>
+                    <td><span class="status-badge ${row.firstTarget ? 'achieved' : 'not-achieved'}">${row.firstTarget ? '达标' : '不达标'}</span></td>
+                    <td><span class="status-badge ${row.positiveTarget ? 'achieved' : 'not-achieved'}">${row.positiveTarget ? '达标' : '不达标'}</span></td>
+                </tr>
+            `).join('');
+
+            // Update chart
+            updateChart(dates, firstData, positiveData, baseline);
+            renderStatsTable();
+        }
+
+        function updateChart(dates, firstData, positiveData, baseline) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: '首位得分',
+                            data: firstData,
+                            borderColor: '#ea4335',
+                            backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: firstData.map(v => v >= 8 ? '#ea4335' : 'transparent'),
+                            pointBorderColor: '#ea4335',
+                            pointBorderWidth: 2
+                        },
+                        {
+                            label: '中正得分',
+                            data: positiveData,
+                            borderColor: '#fbbc04',
+                            backgroundColor: 'rgba(251, 188, 4, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: positiveData.map(v => v >= 7 ? '#fbbc04' : 'transparent'),
+                            pointBorderColor: '#fbbc04',
+                            pointBorderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '次';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 12 }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 11,
+                            grid: {
+                                color: 'rgba(0,0,0,0.06)'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 12 },
+                                callback: function(value) {
+                                    return value === 11 ? '' : value + '次';
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                },
+                plugins: [{
+                    id: 'targetLines',
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        
+                        // Draw 8次 target line for 首位
+                        const y8 = yAxis.getPixelForValue(8);
+                        ctx.save();
+                        ctx.strokeStyle = '#ea4335';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, y8);
+                        ctx.lineTo(xAxis.right, y8);
+                        ctx.stroke();
+                        ctx.fillStyle = '#ea4335';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.fillText('首位目标: 8次', xAxis.right - 100, y8 - 8);
+                        ctx.restore();
+                        
+                        // Draw 7次 target line for 中正
+                        const y7 = yAxis.getPixelForValue(7);
+                        ctx.save();
+                        ctx.strokeStyle = '#fbbc04';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, y7);
+                        ctx.lineTo(xAxis.right, y7);
+                        ctx.stroke();
+                        ctx.fillStyle = '#fbbc04';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.fillText('中正目标: 7次', xAxis.right - 100, y7 - 8);
+                        ctx.restore();
+                        
+                        // Draw baseline lines
+                        const yBaselineFirst = yAxis.getPixelForValue(baseline[0]);
+                        const yBaselinePositive = yAxis.getPixelForValue(baseline[1]);
+
+                        // 首位 baseline - solid red line (full width)
+                        ctx.save();
+                        ctx.strokeStyle = '#ea4335';
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([8, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yBaselineFirst);
+                        ctx.lineTo(xAxis.right, yBaselineFirst);
+                        ctx.stroke();
+                        // 首位基准文字由HTML元素显示，不在画布上绘制
+                        ctx.restore();
+
+                        // 中正 baseline - solid yellow line (full width)
+                        ctx.save();
+                        ctx.strokeStyle = '#fbbc04';
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([8, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yBaselinePositive);
+                        ctx.lineTo(xAxis.right, yBaselinePositive);
+                        ctx.stroke();
+                        // 中正基准文字由HTML元素显示，不在画布上绘制
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+
+
+        function renderStatsTable() {
+            const data = DATA[currentPlatform];
+            const kw = data.keywords[currentKwIndex];
+            const dailyData = data.daily;
+            const isBrand = kw.type === '品牌词';
+
+            const thresholds = { '7月': 13, '8月': 26 };
+            const stats = {};
+            Object.keys(thresholds).forEach(m => {
+                stats[m] = { total: 0, firstOk: 0, positiveOk: 0 };
+            });
+
+            Object.entries(dailyData).forEach(([date, dayData]) => {
+                const monthKey = date.startsWith('07/') ? '7月' : date.startsWith('08/') ? '8月' : null;
+                if (!monthKey || !stats[monthKey]) return;
+                stats[monthKey].total++;
+                const [first, positive] = dayData[currentKwIndex];
+                if (!isBrand && first >= 8) stats[monthKey].firstOk++;
+                if (positive >= 7) stats[monthKey].positiveOk++;
+            });
+
+            document.getElementById('statsKwName').textContent =
+                'B' + String(currentKwIndex + 1).padStart(3, '0') + ' ' + kw.name;
+
+
+            const rows = [];
+            // 8月 row first
+            {
+                const a = stats['8月'];
+                const fc = !isBrand && a.total > 0 && a.firstOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                const pc = a.total > 0 && a.positiveOk >= thresholds['8月'] ? 'achieved-green' : 'not-achieved';
+                const fCell = isBrand ? '<td class="na-cell">—</td>' :
+                    `<td class="${fc}">${a.total > 0 ? a.firstOk + '/' + a.total : '—'}</td>`;
+                rows.push(`<tr><td>8月</td>${fCell}<td class="${pc}">${a.total > 0 ? a.positiveOk + '/' + a.total : '—'}</td></tr>`);
+            }
+            // 7月 row
+            {
+                const j = stats['7月'];
+                const fc = !isBrand && j.total > 0 && j.firstOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const pc = j.total > 0 && j.positiveOk >= thresholds['7月'] ? 'achieved-green' : 'not-achieved';
+                const fCell = isBrand ? '<td class="na-cell">—</td>' :
+                    `<td class="${fc}">${j.total > 0 ? j.firstOk + '/' + j.total : '—'}</td>`;
+                rows.push(`<tr><td>7月</td>${fCell}<td class="${pc}">${j.total > 0 ? j.positiveOk + '/' + j.total : '—'}</td></tr>`);
+            }
+            document.getElementById('statsTableBody').innerHTML = rows.join('');
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
