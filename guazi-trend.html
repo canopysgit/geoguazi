@@ -395,7 +395,7 @@
         <div class="meta">
             <span><div class="dot"></div>数据周期: 2026.7.16 – 8.4</span>
             <span><div class="dot"></div>考核标准: 首位≥8次 · 中正≥7次</span>
-            <span><div class="dot"></div>基准线: 7/11-7/15 平均值</span>
+
         </div>
     </div>
     
@@ -431,14 +431,7 @@
                         <div class="legend-line" style="border-color: #fbbc04;"></div>
                         <span>中正目标: 7次</span>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-line" style="border-color: #ea4335; border-style: dashed;"></div>
-                        <span>首位基准: <strong id="legendFirstBaseline">-</strong></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-line" style="border-color: #fbbc04; border-style: dashed;"></div>
-                        <span>中正基准: <strong id="legendPositiveBaseline">-</strong></span>
-                    </div>
+
                 </div>
             </div>
             <div class="chart-container">
@@ -463,6 +456,22 @@
                 <div class="stats-threshold">
                     达标条件：首位≥8次 · 中正≥7次 · 品牌词仅计中正 ·
                     7月目标≥13天 · 8月目标≥26天 · 达标显示绿色
+                </div>
+
+                <!-- Period Averages -->
+                <div style="margin-top: 16px;">
+                    <div class="stats-title">各时段日均达标次数</div>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>时段</th>
+                                <th>首位日均</th>
+                                <th>中正日均</th>
+                            </tr>
+                        </thead>
+                        <tbody id="avgTableBody">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -732,9 +741,7 @@
             document.getElementById('nextBtn').disabled = currentKwIndex === 9;
 
 
-            // Update legend baseline values
-            document.getElementById('legendFirstBaseline').textContent = baseline[0] + '次';
-            document.getElementById('legendPositiveBaseline').textContent = baseline[1] + '次';
+
 
             // Get dates and data
             const dates = Object.keys(dailyData).sort();
@@ -903,34 +910,7 @@
                         ctx.font = 'bold 12px sans-serif';
                         ctx.fillText('中正目标: 7次', xAxis.right - 100, y7 - 8);
                         ctx.restore();
-                        
-                        // Draw baseline lines
-                        const yBaselineFirst = yAxis.getPixelForValue(baseline[0]);
-                        const yBaselinePositive = yAxis.getPixelForValue(baseline[1]);
 
-                        // 首位 baseline - solid red line (full width)
-                        ctx.save();
-                        ctx.strokeStyle = '#ea4335';
-                        ctx.lineWidth = 1.5;
-                        ctx.setLineDash([8, 4]);
-                        ctx.beginPath();
-                        ctx.moveTo(xAxis.left, yBaselineFirst);
-                        ctx.lineTo(xAxis.right, yBaselineFirst);
-                        ctx.stroke();
-                        // 首位基准文字由HTML元素显示，不在画布上绘制
-                        ctx.restore();
-
-                        // 中正 baseline - solid yellow line (full width)
-                        ctx.save();
-                        ctx.strokeStyle = '#fbbc04';
-                        ctx.lineWidth = 1.5;
-                        ctx.setLineDash([8, 4]);
-                        ctx.beginPath();
-                        ctx.moveTo(xAxis.left, yBaselinePositive);
-                        ctx.lineTo(xAxis.right, yBaselinePositive);
-                        ctx.stroke();
-                        // 中正基准文字由HTML元素显示，不在画布上绘制
-                        ctx.restore();
                     }
                 }]
             });
@@ -943,6 +923,7 @@
             const kw = data.keywords[currentKwIndex];
             const dailyData = data.daily;
             const isBrand = kw.type === '品牌词';
+            const baseline = data.baseline[currentKwIndex];
 
             const thresholds = { '7月': 13, '8月': 26 };
             const stats = {};
@@ -983,6 +964,42 @@
                 rows.push(`<tr><td>7月</td>${fCell}<td class="${pc}">${j.total > 0 ? j.positiveOk + '/' + j.total : '—'}</td></tr>`);
             }
             document.getElementById('statsTableBody').innerHTML = rows.join('');
+
+            // Calculate period averages
+            const idx = currentKwIndex;
+            // 7月上半月 (baseline: 7/11-7/15)
+            const julEarlyFirst = baseline[0];
+            const julEarlyPositive = baseline[1];
+            // 7月下半月 (7/16-7/31)
+            let julLateFirstSum = 0, julLatePositiveSum = 0, julLateCount = 0;
+            // 8月 (8/1-today)
+            let augFirstSum = 0, augPositiveSum = 0, augCount = 0;
+
+            Object.entries(dailyData).forEach(([date, dayData]) => {
+                const [first, positive] = dayData[idx];
+                if (date >= '07/16' && date <= '07/31') {
+                    julLateFirstSum += first;
+                    julLatePositiveSum += positive;
+                    julLateCount++;
+                }
+                if (date >= '08/01') {
+                    augFirstSum += first;
+                    augPositiveSum += positive;
+                    augCount++;
+                }
+            });
+
+            const julLateFirstAvg = julLateCount > 0 ? (julLateFirstSum / julLateCount).toFixed(1) : '—';
+            const julLatePositiveAvg = julLateCount > 0 ? (julLatePositiveSum / julLateCount).toFixed(1) : '—';
+            const augFirstAvg = augCount > 0 ? (augFirstSum / augCount).toFixed(1) : '—';
+            const augPositiveAvg = augCount > 0 ? (augPositiveSum / augCount).toFixed(1) : '—';
+
+            const avgRows = [
+                `<tr><td>7月上 (7/11-15)</td><td>${julEarlyFirst.toFixed(1)}次</td><td>${julEarlyPositive.toFixed(1)}次</td></tr>`,
+                `<tr><td>7月下 (7/16-31)</td><td>${julLateFirstAvg}次</td><td>${julLatePositiveAvg}次</td></tr>`,
+                `<tr><td>8月 (8/1-至今)</td><td>${augFirstAvg}次</td><td>${augPositiveAvg}次</td></tr>`
+            ];
+            document.getElementById('avgTableBody').innerHTML = avgRows.join('');
         }
 
         // Start
