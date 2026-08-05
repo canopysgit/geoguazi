@@ -1000,10 +1000,14 @@
             const augFirstAvg = augCount > 0 ? (augFirstSum / augCount).toFixed(1) : '—';
             const augPositiveAvg = augCount > 0 ? (augPositiveSum / augCount).toFixed(1) : '—';
 
+            // 动态计算8月最新日期
+            const augDates = Object.keys(dailyData).filter(d => d >= '08/01').sort();
+            const augLatest = augDates.length > 0 ? augDates[augDates.length - 1] : null;
+            const augLatestLabel = augLatest ? augLatest.replace('/', '.') : '至今';
             const avgRows = [
                 `<tr><td>7月上 (7/11-15)</td><td>${julEarlyFirst.toFixed(1)}次</td><td>${julEarlyPositive.toFixed(1)}次</td></tr>`,
                 `<tr><td>7月下 (7/16-31)</td><td>${julLateFirstAvg}次</td><td>${julLatePositiveAvg}次</td></tr>`,
-                `<tr><td>8月 (8/1-至今)</td><td>${augFirstAvg}次</td><td>${augPositiveAvg}次</td></tr>`
+                `<tr><td>8月 (8.1-${augLatestLabel})</td><td>${augFirstAvg}次</td><td>${augPositiveAvg}次</td></tr>`
             ];
             document.getElementById('avgTableBody').innerHTML = avgRows.join('');
         }
