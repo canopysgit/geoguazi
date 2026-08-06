@@ -311,6 +311,14 @@
             background: #fce8e6;
             color: #c5221f;
         }
+        .status-badge.baseline {
+            background: #f1f3f4;
+            color: #9aa0a6;
+        }
+        tr.baseline-row td {
+            color: #9aa0a6;
+            background: #fafafa;
+        }
         
         /* Footer */
         .footer {
@@ -522,6 +530,11 @@
                 ],
                 // Daily data: [首位, 中正]
                 daily: {
+                    "07/11": [[10, 10], [0, 10], [10, 10], [7, 10], [0, 0], [8, 9], [9, 9], [1, 3], [9, 8], [0, 1]],
+                    "07/12": [[8, 8], [0, 10], [10, 10], [8, 9], [1, 1], [8, 10], [8, 10], [3, 4], [7, 9], [0, 0]],
+                    "07/13": [[8, 9], [4, 10], [9, 10], [8, 8], [0, 0], [10, 10], [8, 7], [0, 2], [10, 9], [0, 1]],
+                    "07/14": [[9, 8], [3, 10], [9, 10], [5, 9], [0, 0], [7, 9], [10, 10], [0, 0], [6, 9], [0, 3]],
+                    "07/15": [[6, 6], [3, 6], [4, 6], [6, 7], [0, 1], [7, 8], [8, 8], [0, 2], [4, 4], [0, 0]],
                     "07/16": [[5, 9], [3, 10], [5, 10], [7, 10], [0, 0],
                               [5, 10], [9, 10], [0, 0], [10, 9], [0, 3]],
                     "07/17": [[6, 9], [3, 10], [4, 8], [9, 9], [1, 2],
@@ -584,6 +597,11 @@
                     [7.0, 8.4], [7.8, 7.8], [0.4, 0.4], [8.4, 5.6], [0, 0.4]
                 ],
                 daily: {
+                    "07/11": [[7, 9], [10, 9], [10, 8], [7, 9], [0, 0], [8, 9], [10, 7], [0, 0], [9, 6], [0, 0]],
+                    "07/12": [[7, 5], [10, 6], [9, 7], [5, 7], [0, 0], [7, 8], [6, 9], [0, 0], [9, 5], [0, 1]],
+                    "07/13": [[9, 6], [10, 10], [9, 10], [8, 10], [0, 0], [7, 9], [8, 6], [2, 2], [10, 5], [0, 1]],
+                    "07/14": [[9, 6], [8, 8], [9, 10], [5, 6], [0, 0], [10, 10], [8, 8], [0, 0], [9, 6], [0, 0]],
+                    "07/15": [[6, 5], [3, 9], [8, 9], [4, 8], [0, 0], [3, 6], [7, 9], [0, 0], [5, 6], [0, 0]],
                     "07/16": [[6, 4], [5, 10], [6, 9], [7, 9], [0, 0],
                               [5, 7], [4, 6], [0, 0], [5, 7], [0, 0]],
                     "07/17": [[5, 6], [2, 10], [2, 6], [4, 8], [0, 0],
@@ -646,6 +664,11 @@
                     [5.2, 7.6], [8.4, 10.0], [0.2, 1.0], [8.2, 8.4], [0, 9.0]
                 ],
                 daily: {
+                    "07/11": [[7, 8], [10, 10], [8, 9], [7, 9], [1, 1], [5, 6], [7, 10], [1, 2], [7, 8], [0, 8]],
+                    "07/12": [[8, 9], [10, 10], [5, 9], [7, 10], [1, 1], [5, 7], [8, 10], [0, 2], [8, 10], [0, 8]],
+                    "07/13": [[7, 9], [7, 10], [4, 6], [6, 7], [0, 0], [6, 8], [10, 10], [0, 0], [10, 9], [0, 10]],
+                    "07/14": [[6, 9], [9, 10], [5, 9], [6, 7], [0, 0], [5, 8], [9, 10], [0, 1], [9, 8], [0, 9]],
+                    "07/15": [[9, 9], [10, 10], [2, 9], [6, 9], [1, 1], [5, 9], [8, 10], [0, 0], [7, 7], [0, 10]],
                     "07/16": [[8, 9], [10, 10], [3, 10], [6, 9], [1, 1],
                               [7, 10], [7, 10], [0, 0], [10, 8], [0, 8]],
                     "07/17": [[7, 10], [7, 10], [2, 8], [8, 10], [1, 1],
@@ -768,7 +791,8 @@
                     first,
                     positive,
                     firstTarget,
-                    positiveTarget
+                    positiveTarget,
+                    isBaseline: date < '07/16'
                 });
             });
 
@@ -776,12 +800,12 @@
             // Update table
             const tbody = document.getElementById('dailyTableBody');
             tbody.innerHTML = tableRows.map(row => `
-                <tr>
-                    <td>${row.date}</td>
+                <tr class="${row.isBaseline ? 'baseline-row' : ''}">
+                    <td>${row.date}${row.isBaseline ? ' <small style="color:#aaa">基线</small>' : ''}</td>
                     <td>${row.first}</td>
                     <td>${row.positive}</td>
-                    <td><span class="status-badge ${row.firstTarget ? 'achieved' : 'not-achieved'}">${row.firstTarget ? '达标' : '不达标'}</span></td>
-                    <td><span class="status-badge ${row.positiveTarget ? 'achieved' : 'not-achieved'}">${row.positiveTarget ? '达标' : '不达标'}</span></td>
+                    <td><span class="status-badge ${row.isBaseline ? 'baseline' : (row.firstTarget ? 'achieved' : 'not-achieved')}">${row.isBaseline ? '—' : (row.firstTarget ? '达标' : '不达标')}</span></td>
+                    <td><span class="status-badge ${row.isBaseline ? 'baseline' : (row.positiveTarget ? 'achieved' : 'not-achieved')}">${row.isBaseline ? '—' : (row.positiveTarget ? '达标' : '不达标')}</span></td>
                 </tr>
             `).join('');
 
@@ -792,7 +816,8 @@
 
         function updateChart(dates, firstData, positiveData, baseline) {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            
+            const BASELINE_COUNT = 5; // 07/11-07/15
+
             if (chart) {
                 chart.destroy();
             }
@@ -810,11 +835,16 @@
                             borderWidth: 2,
                             fill: true,
                             tension: 0.3,
-                            pointRadius: 6,
+                            pointRadius: firstData.map((_, i) => i < BASELINE_COUNT ? 4 : 6),
                             pointHoverRadius: 8,
-                            pointBackgroundColor: firstData.map(v => v >= 8 ? '#ea4335' : 'transparent'),
-                            pointBorderColor: '#ea4335',
-                            pointBorderWidth: 2
+                            pointBackgroundColor: firstData.map((v, i) => i < BASELINE_COUNT ? '#bbb' : (v >= 8 ? '#ea4335' : 'transparent')),
+                            pointBorderColor: firstData.map((_, i) => i < BASELINE_COUNT ? '#bbb' : '#ea4335'),
+                            pointBorderWidth: firstData.map((_, i) => i < BASELINE_COUNT ? 1 : 2),
+                            segment: {
+                                borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
+                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? '#bbb' : '#ea4335'),
+                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(180,180,180,0.06)' : 'rgba(234, 67, 53, 0.1)')
+                            }
                         },
                         {
                             label: '中正得分',
@@ -824,11 +854,16 @@
                             borderWidth: 2,
                             fill: true,
                             tension: 0.3,
-                            pointRadius: 6,
+                            pointRadius: positiveData.map((_, i) => i < BASELINE_COUNT ? 4 : 6),
                             pointHoverRadius: 8,
-                            pointBackgroundColor: positiveData.map(v => v >= 7 ? '#fbbc04' : 'transparent'),
-                            pointBorderColor: '#fbbc04',
-                            pointBorderWidth: 2
+                            pointBackgroundColor: positiveData.map((v, i) => i < BASELINE_COUNT ? '#bbb' : (v >= 7 ? '#fbbc04' : 'transparent')),
+                            pointBorderColor: positiveData.map((_, i) => i < BASELINE_COUNT ? '#bbb' : '#fbbc04'),
+                            pointBorderWidth: positiveData.map((_, i) => i < BASELINE_COUNT ? 1 : 2),
+                            segment: {
+                                borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
+                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? '#bbb' : '#fbbc04'),
+                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(180,180,180,0.06)' : 'rgba(251, 188, 4, 0.1)')
+                            }
                         }
                     ]
                 },
@@ -881,12 +916,30 @@
                     }
                 },
                 plugins: [{
+                    id: 'baselineShade',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const xAxis = chart.scales.x;
+                        const yAxis = chart.scales.y;
+                        // Shade the baseline period (first 5 data points)
+                        const lastBaselineX = xAxis.getPixelForValue(BASELINE_COUNT - 0.5);
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(200, 200, 200, 0.10)';
+                        ctx.fillRect(xAxis.left, yAxis.top, lastBaselineX - xAxis.left, yAxis.bottom - yAxis.top);
+                        // Label
+                        ctx.fillStyle = '#999';
+                        ctx.font = '11px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('基线期', (xAxis.left + lastBaselineX) / 2, yAxis.top + 16);
+                        ctx.restore();
+                    }
+                }, {
                     id: 'targetLines',
                     afterDraw: function(chart) {
                         const ctx = chart.ctx;
                         const yAxis = chart.scales.y;
                         const xAxis = chart.scales.x;
-                        
+
                         // Draw 8次 target line for 首位
                         const y8 = yAxis.getPixelForValue(8);
                         ctx.save();
@@ -901,7 +954,7 @@
                         ctx.font = 'bold 12px sans-serif';
                         ctx.fillText('首位目标: 8次', xAxis.right - 100, y8 - 8);
                         ctx.restore();
-                        
+
                         // Draw 7次 target line for 中正
                         const y7 = yAxis.getPixelForValue(7);
                         ctx.save();
@@ -938,6 +991,7 @@
             });
 
             Object.entries(dailyData).forEach(([date, dayData]) => {
+                if (date < '07/16') return; // Skip baseline period (07/11-07/15)
                 const monthKey = date.startsWith('07/') ? '7月' : date.startsWith('08/') ? '8月' : null;
                 if (!monthKey || !stats[monthKey]) return;
                 stats[monthKey].total++;
