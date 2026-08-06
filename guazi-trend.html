@@ -863,6 +863,8 @@
                                 borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
                                 borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.4)' : '#fbbc04'),
                                 backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.04)' : 'rgba(251, 188, 4, 0.1)')
+                            }
+                        }
                         {
                             label: '中正得分',
                             data: positiveData,
@@ -873,13 +875,13 @@
                             tension: 0.3,
                             pointRadius: positiveData.map((_, i) => i < BASELINE_COUNT ? 4 : 6),
                             pointHoverRadius: 8,
-                            pointBackgroundColor: positiveData.map((v, i) => i < BASELINE_COUNT ? '#bbb' : (v >= 7 ? '#fbbc04' : 'transparent')),
-                            pointBorderColor: positiveData.map((_, i) => i < BASELINE_COUNT ? '#bbb' : '#fbbc04'),
+                            pointBackgroundColor: positiveData.map((v, i) => i < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.35)' : (v >= 7 ? '#fbbc04' : 'transparent')),
+                            pointBorderColor: positiveData.map((_, i) => i < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.5)' : '#fbbc04'),
                             pointBorderWidth: positiveData.map((_, i) => i < BASELINE_COUNT ? 1 : 2),
                             segment: {
                                 borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
-                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? '#bbb' : '#fbbc04'),
-                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(180,180,180,0.06)' : 'rgba(251, 188, 4, 0.1)')
+                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.4)' : '#fbbc04'),
+                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.04)' : 'rgba(251, 188, 4, 0.1)')
                             }
                         }
                     ]
