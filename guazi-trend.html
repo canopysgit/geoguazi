@@ -837,15 +837,32 @@
                             tension: 0.3,
                             pointRadius: firstData.map((_, i) => i < BASELINE_COUNT ? 4 : 6),
                             pointHoverRadius: 8,
-                            pointBackgroundColor: firstData.map((v, i) => i < BASELINE_COUNT ? '#bbb' : (v >= 8 ? '#ea4335' : 'transparent')),
-                            pointBorderColor: firstData.map((_, i) => i < BASELINE_COUNT ? '#bbb' : '#ea4335'),
+                            pointBackgroundColor: firstData.map((v, i) => i < BASELINE_COUNT ? 'rgba(234, 67, 53, 0.35)' : (v >= 8 ? '#ea4335' : 'transparent')),
+                            pointBorderColor: firstData.map((_, i) => i < BASELINE_COUNT ? 'rgba(234, 67, 53, 0.5)' : '#ea4335'),
                             pointBorderWidth: firstData.map((_, i) => i < BASELINE_COUNT ? 1 : 2),
                             segment: {
                                 borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
-                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? '#bbb' : '#ea4335'),
-                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(180,180,180,0.06)' : 'rgba(234, 67, 53, 0.1)')
+                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(234, 67, 53, 0.4)' : '#ea4335'),
+                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(234, 67, 53, 0.04)' : 'rgba(234, 67, 53, 0.1)')
                             }
                         },
+                        {
+                            label: '中正得分',
+                            data: positiveData,
+                            borderColor: '#fbbc04',
+                            backgroundColor: 'rgba(251, 188, 4, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: positiveData.map((_, i) => i < BASELINE_COUNT ? 4 : 6),
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: positiveData.map((v, i) => i < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.35)' : (v >= 7 ? '#fbbc04' : 'transparent')),
+                            pointBorderColor: positiveData.map((_, i) => i < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.5)' : '#fbbc04'),
+                            pointBorderWidth: positiveData.map((_, i) => i < BASELINE_COUNT ? 1 : 2),
+                            segment: {
+                                borderDash: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? [5, 5] : []),
+                                borderColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.4)' : '#fbbc04'),
+                                backgroundColor: ctx => (ctx.p0DataIndex < BASELINE_COUNT ? 'rgba(251, 188, 4, 0.04)' : 'rgba(251, 188, 4, 0.1)')
                         {
                             label: '中正得分',
                             data: positiveData,
